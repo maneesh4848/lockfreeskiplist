@@ -1,31 +1,38 @@
 package lockfree_skiplist;
 
+
 public class test
 {
 	public static void main(String[] args)
 	{
-		skiplisttest test = new skiplisttest();
-		test.testSequential();
-		try
+		long starttime = System.nanoTime();
+		
+		skiplisttest listtest = new skiplisttest();
+		listtest.testSequential();
+		/*try
 		{
-			test.testParallelBoth();
+			listtest.testParallelAdd();
 		}
 		catch (Exception e)
 		{
 		}
 		try
 		{
-			test.testParallelAdd();
+			listtest.testParallelRemove();
 		}
-		catch (Exception e)
+		catch (Exception e1)
 		{
-		}
+		}*/
 		try
 		{
-			test.testParallelRemove();
+			listtest.testParallelBoth();
 		}
 		catch (Exception e)
 		{
 		}
+		
+		long endtime = System.nanoTime();
+		System.out.println(endtime-starttime);
+		System.exit(0);
 	}
 }
