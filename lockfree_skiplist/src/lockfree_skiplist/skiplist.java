@@ -3,6 +3,7 @@ package lockfree_skiplist;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
+
 public class skiplist
 {
 	private static final int maxheight = 20;
@@ -99,6 +100,35 @@ public class skiplist
 			return curr.getdata()==value;
 		}
 	}
+	
+	public void print()
+	{
+		for(int level = maxheight; level >= 0; level--)
+		{
+			System.out.print(level);
+			boolean[] temp = {false};
+			node curr = head;
+			node after = curr.next[level].get(temp);
+			while(after != null)
+			{
+				System.out.print(Integer.toString(curr.getdata()) + ' ');
+				int flag = 0;
+				while(temp[0] && after != null)
+				{
+					flag = 1;
+					curr = after;
+					after = after.next[level].get(temp);
+				}
+				if(flag == 0)
+				{
+					after = after.next[level].get(temp);
+				}
+			}
+			System.out.println();
+		
+		}
+	}
+	
 	
 	public boolean add(int value)
 	{
