@@ -22,7 +22,12 @@ public class skiplist
 	private int randomheight()
 	{
 		Random rand = new Random();
-	    return(rand.nextInt(maxheight + 1));
+		int height = 0;
+		while(rand.nextInt(2) == 1)
+		{
+			height++;
+		}
+		return height;
 	}
 	
 	public boolean find(int value,node[] pred,node[] succ)
