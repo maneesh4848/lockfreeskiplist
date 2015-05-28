@@ -4,11 +4,9 @@ package lockfree_skiplist;
 public class test
 {
 	public static void main(String[] args)
-	{
-		long starttime = System.nanoTime();
-		
+	{		
 		skiplisttest listtest = new skiplisttest();
-		listtest.testSequential();
+		//listtest.testSequential();
 		/*try
 		{
 			listtest.testParallelAdd();
@@ -31,8 +29,6 @@ public class test
 		{
 		}
 		
-		long endtime = System.nanoTime();
-		System.out.println(endtime-starttime);
 		System.exit(0);
 	}
 }

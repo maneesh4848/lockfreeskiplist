@@ -1,5 +1,8 @@
 package lockfree_skiplist;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
@@ -10,24 +13,36 @@ import junit.framework.TestCase;
 
 public class skiplisttest extends TestCase
 {
-	private final static int THREADS = 8;
+	//Thread support
+	private final static int THREADS = 4;
 	private final static int TEST_SIZE = 128;
 	private final static int PER_THREAD = TEST_SIZE / THREADS;
+	
+	//skip list
 	skiplist instance;
+	
+	//Threads for parallel insertion and deletion
 	Thread[] thread = new Thread[THREADS];
-	AddThread[] addthreads;
-	RemoveThread[] removethreads;
 	mythread[] parallel;
+	
+	//Test Case support
 	ArrayList<Integer> addset;
 	ArrayList<Integer> removeset;
 	ArrayList<Integer> containsset;
+	boolean done;
+	
+	//Printing support
 	int numseconds;
 	private boolean printbit;
-	boolean done;
+	long starttime;
+	
+	//Printing Output of function
+	PrintWriter outfile;
 
 	//Constructor
 	public skiplisttest()
 	{
+		starttime = System.currentTimeMillis();
 		numseconds = 0;
 		instance = new skiplist();
 		printbit = false;
@@ -61,6 +76,16 @@ public class skiplisttest extends TestCase
 			}
 		}
 		starttimer();
+		try
+		{
+			outfile = new PrintWriter("output.txt","UTF-8");
+		}
+		catch (FileNotFoundException e)
+		{
+		}
+		catch (UnsupportedEncodingException e)
+		{
+		}
 	}
 	
 	//Sequential calls
@@ -74,7 +99,7 @@ public class skiplisttest extends TestCase
 		{
 			if(!instance.add(i));
 			{
-				//System.out.printf("%d already present in list\n", i);
+				outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad insert: " + Integer.toString(i));
 				//fail("bad insert: " + i);
 			}
 		}
@@ -82,7 +107,7 @@ public class skiplisttest extends TestCase
 		{
 			if (!instance.contains(i))
 			{
-				//System.out.printf("Value: %d not found\n", i);
+				outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad contains: " + Integer.toString(i));
 				//fail("bad contains: " + i );
 			}
 		}
@@ -90,7 +115,7 @@ public class skiplisttest extends TestCase
 		{
 			if (!instance.remove(i))
 			{
-				//System.out.printf("Could not remove value: %d\n", i);
+				outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad remove: " + Integer.toString(i));
 				//fail("bad remove: " + i );
 			}
 		}
@@ -125,7 +150,8 @@ public class skiplisttest extends TestCase
 		{
 			if (!instance.contains(i))
 			{
-				System.out.printf("Value: %d not found\n", i);
+				outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad contains: " + Integer.toString(i));
+				//System.out.printf("Value: %d not found\n", i);
 				//fail("bad contains: " + i );
 			}
 
@@ -135,7 +161,8 @@ public class skiplisttest extends TestCase
 		{
 			if (!instance.remove(i))
 			{
-				System.out.printf("Could not remove value: %d\n", i);
+				outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad remove: " + Integer.toString(i));
+				//System.out.printf("Could not remove value: %d\n", i);
 				//fail("bad remove: " + i );
 			}
 		}
@@ -157,7 +184,8 @@ public class skiplisttest extends TestCase
 		{
 			if(!instance.add(i));
 			{
-				System.out.printf("%d already present in list\n", i);
+				outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad insert: " + Integer.toString(i));
+				//System.out.printf("%d already present in list\n", i);
 				//fail("bad insert: " + i);
 			}
 		}
@@ -166,7 +194,8 @@ public class skiplisttest extends TestCase
 			//System.out.printf("Searching for value: %d\n", i);
 			if (!instance.contains(i))
 			{
-				System.out.printf("Value: %d not found\n", i);
+				outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad insert: " + Integer.toString(i));
+				//System.out.printf("Value: %d not found\n", i);
 				//fail("bad contains: " + i );
 			}
 		}
@@ -202,10 +231,6 @@ public class skiplisttest extends TestCase
 		{
 			System.out.print("Thread " + Integer.toString(i) + "\t");
 		}
-		/*for(int i = 0; i < THREADS; i++)
-		{
-			System.out.print("RemoveThread " + Integer.toString(i) + "\t");
-		}*/
 		System.out.println();
 		System.out.println("-------------------------------------------------------------------------------------------------");
 
@@ -226,6 +251,7 @@ public class skiplisttest extends TestCase
 		System.out.println("working");
 		System.out.println();
 		System.out.println();
+		System.out.println(System.currentTimeMillis()-starttime);
 		printbit = false;
 	}
 	
@@ -247,6 +273,7 @@ public class skiplisttest extends TestCase
 				threadvalue = value + i;
 				if(!instance.add(value + i))
 				{
+					outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad insert: " + Integer.toString(i));
 					//System.out.printf("Value %d already present in list\n", value+i);
 				}
 				try
@@ -287,6 +314,7 @@ public class skiplisttest extends TestCase
 				}
 				if (!instance.remove(value + i))
 				{
+					outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad remove: " + Integer.toString(i));
 					//System.out.printf("Could not remove value: %d\n", value + i);
 					//fail("RemoveThread: duplicate remove: " + (value + i));
 				}
@@ -320,11 +348,8 @@ public class skiplisttest extends TestCase
 					{
 						int index = rand.nextInt(containsset.size());
 						threadstat = "searching";
-						if(containsset.size() > index)
-						{
-							threadvalue = containsset.get(index);
-							containsset.remove(index);
-						}
+						threadvalue = containsset.get(index);
+						containsset.remove(index);
 						try
 						{
 							Thread.sleep(10);
@@ -334,11 +359,12 @@ public class skiplisttest extends TestCase
 						}
 						if(!instance.contains(threadvalue))
 						{
+							outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad contains: " + Integer.toString(threadvalue));
 							//System.out.printf("%d not in list\n", threadvalue);
 						}
+						threadstat = "sleeping";
+						threadvalue = Integer.MIN_VALUE;
 					}
-					threadstat = "sleeping";
-					threadvalue = Integer.MIN_VALUE;
 				}
 				else if(op < 3)
 				{
@@ -346,11 +372,8 @@ public class skiplisttest extends TestCase
 					{
 						int index = rand.nextInt(addset.size());
 						threadstat = "inserting";
-						if(addset.size() > index)
-						{
-							threadvalue = addset.get(index);
-							addset.remove(index);
-						}
+						threadvalue = addset.get(index);
+						addset.remove(index);
 						try
 						{
 							Thread.sleep(10);
@@ -360,11 +383,12 @@ public class skiplisttest extends TestCase
 						}
 						if(!instance.add(threadvalue))
 						{
+							outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad insert: " + Integer.toString(threadvalue));
 							//System.out.printf("Value %d already present in list\n", threadvalue);
 						}
+						threadstat = "sleeping";
+						threadvalue = Integer.MIN_VALUE;
 					}
-					threadstat = "sleeping";
-					threadvalue = Integer.MIN_VALUE;
 				}
 				else
 				{
@@ -372,11 +396,8 @@ public class skiplisttest extends TestCase
 					{
 						int index = rand.nextInt(removeset.size());
 						threadstat = "deleting";
-						if(removeset.size() > index)
-						{
-							threadvalue = removeset.get(index);
-							removeset.remove(index);
-						}
+						threadvalue = removeset.get(index);
+						removeset.remove(index);
 						try
 						{
 							Thread.sleep(10);
@@ -386,11 +407,12 @@ public class skiplisttest extends TestCase
 						}
 						if(!instance.remove(threadvalue))
 						{
+							outfile.println("At time t = " + Long.toString(System.currentTimeMillis() - starttime) + "ms bad remove: " + Integer.toString(threadvalue));
 							//System.out.printf("Could not remove value: %d\n", threadvalue);
 						}
+						threadstat = "sleeping";
+						threadvalue = Integer.MIN_VALUE;
 					}
-					threadstat = "sleeping";
-					threadvalue = Integer.MIN_VALUE;
 				}
 			}
 		}
